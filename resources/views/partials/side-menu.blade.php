@@ -48,7 +48,8 @@
             <li class="nav-item dropdown profile-user-dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                    aria-haspopup="true" aria-expanded="false">
-                    <img src="{{asset('images/users/user-dummy-img.jpg')}}" alt="" class="profile-user rounded-circle">
+                    <img src="{{auth()->user()->avatar ?? asset('images/users/user-dummy-img.jpg')}}" alt=""
+                         class="profile-user rounded-circle">
                 </a>
                 <div class="dropdown-menu">
                     <a class="dropdown-item d-flex align-items-center justify-content-between" id="pills-user-tab"
@@ -61,8 +62,11 @@
                        href="auth-changepassword.html">Change Password <i
                             class="bx bx-lock-open text-muted ms-1"></i></a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item d-flex align-items-center justify-content-between" href="auth-logout.html">Log
-                        out <i class="bx bx-log-out-circle text-muted ms-1"></i></a>
+                    <a class="dropdown-item d-flex align-items-center justify-content-between"
+                       href="{{route('auth.get.logout')}}">
+                        Sign Out
+                        <i class="bx bx-log-out-circle text-muted ms-1"></i>
+                    </a>
                 </div>
             </li>
         </ul>

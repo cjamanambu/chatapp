@@ -16,23 +16,27 @@
     <form action="{{route('auth.post.login')}}" method="post">
         @csrf
         <div class="mb-3">
-            <label for="username" class="form-label">Email or Username</label>
-            <input type="text" class="form-control" id="username">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control @error('email') error @enderror" id="email" name="email"
+                   value="{{old('email')}}">
+            @error('email')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <div class="position-relative auth-pass-inputgroup mb-3">
-                <input type="password" class="form-control pe-5" id="password">
-                <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
-                        type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
-            </div>
+            <input type="password" class="form-control @error('password') error @enderror" id="password"
+                   name="password">
+            @error('password')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
         </div>
         <div>
             <div class="float-end">
                 <a href="{{route('auth.get.forgot')}}" class="text-muted small">Forgot password?</a>
             </div>
             <div class="form-check form-check-info font-size-16">
-                <input class="form-check-input" type="checkbox" id="remember-check">
+                <input class="form-check-input" type="checkbox" id="remember-check" name="remember">
                 <label class="form-check-label font-size-14" for="remember-check">
                     Remember me
                 </label>
@@ -48,11 +52,7 @@
             <div class="row">
                 <div class="col-12">
                     <div>
-                        <button type="button" class="btn btn-outline-dark w-100 google-btn">
-                            <img src="{{asset('images/icons/icons8-google-96.png')}}" alt="google icon"
-                                 class="google-icon">
-                            Sign in with Google
-                        </button>
+                        @include('partials.google-btn')
                     </div>
                 </div>
             </div>

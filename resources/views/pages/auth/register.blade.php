@@ -62,11 +62,7 @@
             <div class="row">
                 <div class="col-12">
                     <div>
-                        <button type="button" class="btn btn-outline-dark w-100 google-btn">
-                            <img src="{{asset('images/icons/icons8-google-96.png')}}" alt="google icon"
-                                 class="google-icon">
-                            Sign up with Google
-                        </button>
+                        @include('partials.google-btn')
                     </div>
                 </div>
             </div>

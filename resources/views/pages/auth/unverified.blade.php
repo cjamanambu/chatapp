@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
         <h3>Email Unverified</h3>
         <small class="text-muted">
-            <a href="{{ route('auth.get.login') }}">Logout</a>
+            <a href="{{ route('auth.get.logout') }}">Logout</a>
         </small>
     </div>
     <p>

@@ -4,6 +4,7 @@ namespace App\Http;
 
 use App\Http\Middleware\EmailNotVerified;
 use App\Http\Middleware\EmailVerified;
+use App\Http\Middleware\PreventBackHistory;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -66,6 +67,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'email.verified' => EmailVerified::class,
-        'email.not.verified' => EmailNotVerified::class
+        'email.not.verified' => EmailNotVerified::class,
+        'pbh' => PreventBackHistory::class,
     ];
 }

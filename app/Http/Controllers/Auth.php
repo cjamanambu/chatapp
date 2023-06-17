@@ -37,23 +37,36 @@ class Auth extends Controller
         } catch (ModelNotFoundException $exception) {
             abort(403, $exception->getMessage());
         } catch (\Exception $exception) {
-            abort(500, $exception->getMessage());
+            logger($exception->getMessage());
+            abort(500);
         }
 
         return redirect()->route('home');
     }
 
-    function signIn()
+    function signIn(Request $request): RedirectResponse
     {
+        try {
+            $this->authService->signIn($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
 
+        return redirect()->route('home');
     }
 
     function signUp(Request $request): RedirectResponse
     {
         try {
-            $this->authService->registerNewUser($request);
+            $this->authService->signUp($request);
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
         }
 
         return redirect()->route('home');
@@ -70,7 +83,42 @@ class Auth extends Controller
             $this->authService->resendVerificationEmail();
             return back();
         } catch (\Exception $exception) {
-            abort(500, $exception->getMessage());
+            logger($exception->getMessage());
+            abort(500);
         }
+    }
+
+    function signOut(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->signOut($request);
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('home');
+    }
+
+    function redirectToGoogle()
+    {
+        try {
+            return $this->authService->redirectToGoogle();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+    }
+
+    function handleGoogleCallback(): RedirectResponse
+    {
+        try {
+            $this->authService->handleGoogleCallback();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('home');
     }
 }

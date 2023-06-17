@@ -9,9 +9,12 @@ use App\Models\UserVerify;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class AuthService implements AuthServiceInterface
 {
@@ -22,19 +25,9 @@ class AuthService implements AuthServiceInterface
     /**
      * @throws ValidationException
      */
-    public function registerNewUser(Request $request): void
+    public function signUp(Request $request): void
     {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|unique:users|max:255',
-            'email' => 'required|email|unique:users|max:255',
-            'password' => 'required|confirmed|min:8',
-        ]);
-        if ($validator->fails()) {
-            logger($validator->errors());
-            throw new ValidationException($validator);
-        }
-
-        $newUser = $validator->validated();
+        $newUser = ValidationService::validateSignUp($request);
         $user = User::query()->create($newUser);
 
         $token = Str::random(64);
@@ -45,15 +38,33 @@ class AuthService implements AuthServiceInterface
 
         MailService::sendVerificationMail($user, $token);
 
+        noty()->addSuccess('You signed up successfully. Please check your email to verify your account!');
+
         Auth::login($user);
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function signIn(Request $request): void
+    {
+        $user = ValidationService::validateSignIn($request);
+        if (!Auth::attempt($user, $request->remember)) {
+            throw ValidationException::withMessages([
+                'email' => 'The provided credentials do not match our records.',
+            ]);
+        }
+
+        noty()->addSuccess('You signed in successfully. Good to have you back!');
     }
 
     public function resendVerificationEmail(): void
     {
         $user = Auth::user();
         $token = Str::random(64);
-        UserVerify::query()->where('user_id', $user->id)->update([
-            'token' => $token
+        UserVerify::query()->where('user_id', $user->id)->updateOrCreate([
+            'token' => $token,
+            'user_id' => $user->id
         ]);
 
         MailService::sendVerificationMail($user, $token);
@@ -74,7 +85,47 @@ class AuthService implements AuthServiceInterface
 
         $user->email_verified_at = now();
         $user->save();
-        
+
+        $userVerify->delete();
+
         noty()->addSuccess('Your email has been successfully verified!');
+    }
+
+    public function signOut(Request $request): void
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        noty()->addSuccess('You have been successfully logged out!');
+    }
+
+    public function redirectToGoogle(): RedirectResponse|\Illuminate\Http\RedirectResponse
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback(): void
+    {
+        $user = Socialite::driver('google')->user();
+        $findUser = User::query()->where('social_id', $user->id)->first();
+        if ($findUser) {
+            Auth::login($findUser);
+        } else {
+            $names = explode(' ', $user->name);
+            $newUser = User::query()->create([
+                'username' => $user->nickname ?? strtolower(join("_", $names) . "_" . $user->id),
+                'firstname' => $names[0] ?? null,
+                'lastname' => $names[count($names) - 1] ?? null,
+                'email' => $user->email,
+                'social_id' => $user->id,
+                'social_type' => 'google',
+                'password' => bcrypt(Str::random(64)),
+                'email_verified_at' => now(),
+                'avatar' => $user->avatar ?? null
+            ]);
+            Auth::login($newUser);
+        }
+        noty()->addSuccess('You signed in successfully. Good to have you back!');
     }
 }
