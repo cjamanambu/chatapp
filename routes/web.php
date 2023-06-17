@@ -25,6 +25,7 @@ Route::prefix('auth')->group(function () {
         Route::get('login', [Auth::class, 'login'])->name('auth.get.login');
         Route::get('register', [Auth::class, 'register'])->name('auth.get.register');
         Route::get('forgot-password', [Auth::class, 'forgotPassword'])->name('auth.get.forgot');
+        Route::get('verify/{token}', [Auth::class, 'verifyEmail'])->name('auth.get.verify');
         Route::post('login', [Auth::class, 'signIn'])->name('auth.post.login');
         Route::post('register', [Auth::class, 'signUp'])->name('auth.post.register');
     });

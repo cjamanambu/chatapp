@@ -16,15 +16,31 @@
         @csrf
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{old('email')}}" required>
+            <input type="email" class="form-control @error('email') error @enderror" id="email" name="email"
+                   value="{{old('email')}}" required>
+            @error('email')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
         </div>
         <div class="mb-3">
             <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" value="{{old('username')}}" required>
+            <input type="text" class="form-control @error('username') error @enderror" id="username" name="username"
+                   value="{{old('username')}}" required>
+            @error('username')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
         </div>
         <div class="mb-3">
             <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required>
+            <input type="password" class="form-control @error('password') error @enderror" id="password" name="password"
+                   required>
+            @error('password')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="password" name="password_confirmation" required>
         </div>
 
         <div class="mb-4">
