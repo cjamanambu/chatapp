@@ -6,7 +6,9 @@ use App\Interfaces\AuthServiceInterface;
 use App\Jobs\VerifyEmailJob;
 use App\Models\User;
 use App\Models\UserVerify;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,9 +42,39 @@ class AuthService implements AuthServiceInterface
             'user_id' => $user->id,
             'token' => $token
         ]);
-        
+
         MailService::sendVerificationMail($user, $token);
 
-        logger($user);
+        Auth::login($user);
+    }
+
+    public function resendVerificationEmail(): void
+    {
+        $user = Auth::user();
+        $token = Str::random(64);
+        UserVerify::query()->where('user_id', $user->id)->update([
+            'token' => $token
+        ]);
+
+        MailService::sendVerificationMail($user, $token);
+        noty()->addSuccess('The verification email has been successfully resent. Please check your email!');
+    }
+
+    public function verifyEmail($token): void
+    {
+        $userVerify = UserVerify::query()->where('token', $token)->first();
+        if (!$userVerify) {
+            throw new ModelNotFoundException('Invalid email verification token');
+        }
+
+        $user = User::query()->find($userVerify->user_id);
+        if (!$user) {
+            throw new ModelNotFoundException('Invalid email verification token');
+        }
+
+        $user->email_verified_at = now();
+        $user->save();
+        
+        noty()->addSuccess('Your email has been successfully verified!');
     }
 }
