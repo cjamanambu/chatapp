@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Interfaces\AuthServiceInterface;
+use App\Jobs\VerifyEmailJob;
 use App\Models\User;
 use App\Models\UserVerify;
 use Illuminate\Http\Request;
@@ -39,8 +40,8 @@ class AuthService implements AuthServiceInterface
             'user_id' => $user->id,
             'token' => $token
         ]);
-
-        $this->mailService::sendVerificationMail($user, $token);
+        
+        MailService::sendVerificationMail($user, $token);
 
         logger($user);
     }
