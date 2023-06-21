@@ -114,6 +114,8 @@ class Auth extends Controller
     {
         try {
             $this->authService->handleGoogleCallback();
+        } catch (ValidationException $e) {
+            return redirect()->route('auth.get.login')->withErrors($e->errors())->withInput();
         } catch (\Exception $exception) {
             logger($exception->getMessage());
             abort(500);

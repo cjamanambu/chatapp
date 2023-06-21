@@ -39,14 +39,14 @@ Route::prefix('auth')->group(function () {
     });
     Route::middleware(['auth'])->group(function () {
         Route::get('logout', [Auth::class, 'signOut'])->name('auth.get.logout');
-        Route::get('unverified', [Auth::class, 'unverified'])->name('auth.get.unverified')->middleware('email.not.verified');
-        Route::get('resend-verification', [Auth::class, 'resendVerificationEmail'])->name('auth.get.resend-verification')->middleware('email.not.verified');
+        Route::middleware(['email.not.verified'])->group(function () {
+            Route::get('unverified', [Auth::class, 'unverified'])->name('auth.get.unverified');
+            Route::get('resend-verification', [Auth::class, 'resendVerificationEmail'])->name('auth.get.resend-verification');
+        });
     });
     Route::middleware(['email.not.verified', 'signed'])->group(function () {
         Route::get('verify/{token}', [Auth::class, 'verifyEmail'])->name('auth.get.verify');
     });
-
-
 });
 
 Route::prefix('legal')->group(function () {

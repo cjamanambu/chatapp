@@ -6,5 +6,5 @@
 @endsection
 
 @section('content')
-    <h1>Dashboard</h1>
+    @include('partials.chat-main')
 @endsection

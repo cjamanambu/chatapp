@@ -105,6 +105,9 @@ class AuthService implements AuthServiceInterface
         return Socialite::driver('google')->redirect();
     }
 
+    /**
+     * @throws ValidationException
+     */
     public function handleGoogleCallback(): void
     {
         $user = Socialite::driver('google')->user();
@@ -112,6 +115,10 @@ class AuthService implements AuthServiceInterface
         if ($findUser) {
             Auth::login($findUser);
         } else {
+            $existingEmail = User::query()->where('email', $user->email)->first();
+            if ($existingEmail)
+                throw ValidationException::withMessages(['email' => 'An account already exists with that email. Sign in with those credentials.']);
+
             $names = explode(' ', $user->name);
             $newUser = User::query()->create([
                 'username' => $user->nickname ?? strtolower(join("_", $names) . "_" . $user->id),
