@@ -123,4 +123,23 @@ class Auth extends Controller
 
         return redirect()->route('home');
     }
+
+    function changePassword(): View
+    {
+        return view('pages.auth.change-password');
+    }
+
+    function updatePassword(Request $request)
+    {
+        try {
+            $this->authService->updatePassword($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return back();
+    }
 }

@@ -44,4 +44,21 @@ class ValidationService
 
         return $validator->validated();
     }
+
+    /**
+     * @throws ValidationException
+     */
+    static function validateUpdatePassword(Request $request): array
+    {
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required',
+            'password' => 'required|confirmed|min:8'
+        ]);
+        if ($validator->fails()) {
+            logger($validator->errors());
+            throw new ValidationException($validator);
+        }
+
+        return $validator->validated();
+    }
 }

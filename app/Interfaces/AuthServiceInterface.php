@@ -19,4 +19,6 @@ interface AuthServiceInterface
     public function redirectToGoogle();
 
     public function handleGoogleCallback();
+
+    public function updatePassword(Request $request): void;
 }

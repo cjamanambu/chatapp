@@ -135,4 +135,24 @@ class AuthService implements AuthServiceInterface
         }
         noty()->addSuccess('You signed in successfully. Good to have you back!');
     }
+
+    /**
+     * @throws ValidationException
+     */
+    public function updatePassword(Request $request): void
+    {
+        $passwordData = ValidationService::validateUpdatePassword($request);
+        $user = Auth::user();
+        $userData = User::query()->find($user->id);
+        $passwordIsValid = password_verify($passwordData['old_password'], $userData->password);
+        if (!$passwordIsValid)
+            throw ValidationException::withMessages([
+                'old_password' => 'The old password you provided does not match our records.',
+            ]);
+
+        $userData->password = bcrypt($passwordData['password']);
+        $userData->save();
+
+        noty()->addSuccess('You updated your password successfully!');
+    }
 }
