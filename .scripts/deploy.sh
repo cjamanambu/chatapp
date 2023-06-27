@@ -29,7 +29,7 @@ php artisan optimize
 
 # Run database migrations
 echo 'migrate db...'
-php artisan migrate --force
+#php artisan migrate --force
 
 # Exit maintenance mode
 echo 'Exiting maintenance mode...'
