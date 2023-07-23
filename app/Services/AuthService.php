@@ -88,6 +88,9 @@ class AuthService implements AuthServiceInterface
 
         $userVerify->delete();
 
+        // send welcome mail
+        MailService::sendWelcomeMail($user);
+
         noty()->addSuccess('Your email has been successfully verified!');
     }
 
@@ -132,6 +135,10 @@ class AuthService implements AuthServiceInterface
                 'avatar' => $user->avatar ?? null
             ]);
             Auth::login($newUser);
+
+            // send welcome mail
+            MailService::sendWelcomeMail($newUser);
+
         }
         noty()->addSuccess('You signed in successfully. Good to have you back!');
     }

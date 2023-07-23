@@ -11,5 +11,5 @@
 
 <p>
     Regards,<br>
-    CJ Amanambu
+    CJ
 </p>
