@@ -16,10 +16,15 @@
         Don't worry, we've got your back! Just enter your email address and we'll send you a link with which you can
         reset your password.
     </p>
-    <form>
+    <form action="{{route('auth.post.forgot')}}" method="post">
+        @csrf
         <div class="mb-4">
             <label for="email" class="form-label">Email</label>
-            <input type="text" class="form-control" id="email">
+            <input type="text" class="form-control @error('email') error @enderror" id="email" name="email"
+                   value="{{old('email')}}">
+            @error('email')
+            <p class="form-error"> {{ $message }} </p>
+            @enderror
         </div>
 
         <div class="text-center mt-4">

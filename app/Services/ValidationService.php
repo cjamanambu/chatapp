@@ -61,4 +61,39 @@ class ValidationService
 
         return $validator->validated();
     }
+
+    /**
+     * @throws ValidationException
+     */
+    static function validateSendResetLinkEmail(Request $request): array
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            logger($validator->errors());
+            throw new ValidationException($validator);
+        }
+
+        return $validator->validated();
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    static function validateResetPassword(Request $request): array
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required',
+            'password' => 'required|confirmed|min:8'
+        ]);
+
+        if ($validator->fails()) {
+            logger($validator->errors());
+            throw new ValidationException($validator);
+        }
+
+        return $validator->validated();
+    }
 }

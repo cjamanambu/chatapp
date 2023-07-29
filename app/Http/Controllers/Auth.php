@@ -142,4 +142,46 @@ class Auth extends Controller
 
         return back();
     }
+
+    function sendResetLinkEmail(Request $request)
+    {
+        try {
+            $this->authService->sendResetLinkEmail($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return back();
+    }
+
+    function verifyResetLink($token): View
+    {
+        try {
+            $user = $this->authService->verifyResetLink($token);
+        } catch (ModelNotFoundException $exception) {
+            abort(403, $exception->getMessage());
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return view('pages.auth.reset-password', compact('user', 'token'));
+    }
+
+    function resetPassword(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->resetPassword($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('auth.get.login');
+    }
 }

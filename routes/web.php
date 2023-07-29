@@ -34,8 +34,13 @@ Route::prefix('auth')->group(function () {
         Route::get('forgot-password', [Auth::class, 'forgotPassword'])->name('auth.get.forgot');
         Route::post('login', [Auth::class, 'signIn'])->name('auth.post.login');
         Route::post('register', [Auth::class, 'signUp'])->name('auth.post.register');
+        Route::post('forgot-password', [Auth::class, 'sendResetLinkEmail'])->name('auth.post.forgot');
         Route::get('google', [Auth::class, 'redirectToGoogle'])->name('auth.get.google');
         Route::get('google/callback', [Auth::class, 'handleGoogleCallback'])->name('auth.get.google.callback');
+        Route::post('reset-password', [Auth::class, 'resetPassword'])->name('auth.post.reset');
+        Route::middleware(['signed'])->group(function () {
+            Route::get('reset-password/{token}', [Auth::class, 'verifyResetLink'])->name('auth.get.reset');
+        });
     });
     Route::middleware(['auth'])->group(function () {
         Route::get('logout', [Auth::class, 'signOut'])->name('auth.get.logout');

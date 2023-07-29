@@ -2,6 +2,7 @@
 
 namespace App\Interfaces;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 interface AuthServiceInterface
@@ -21,4 +22,10 @@ interface AuthServiceInterface
     public function handleGoogleCallback();
 
     public function updatePassword(Request $request): void;
+
+    public function sendResetLinkEmail(Request $request): void;
+
+    public function verifyResetLink($token): Model;
+
+    public function resetPassword(Request $request): void;
 }

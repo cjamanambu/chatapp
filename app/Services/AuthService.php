@@ -6,6 +6,7 @@ use App\Interfaces\AuthServiceInterface;
 use App\Jobs\VerifyEmailJob;
 use App\Models\User;
 use App\Models\UserVerify;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -124,7 +125,7 @@ class AuthService implements AuthServiceInterface
 
             $names = explode(' ', $user->name);
             $newUser = User::query()->create([
-                'username' => $user->nickname ?? strtolower(join("_", $names) . "_" . $user->id),
+                'username' => $user->nickname ?? strtolower(join("_", $names) . "_" . Str::random(6)),
                 'firstname' => $names[0] ?? null,
                 'lastname' => $names[count($names) - 1] ?? null,
                 'email' => $user->email,
@@ -161,5 +162,64 @@ class AuthService implements AuthServiceInterface
         $userData->save();
 
         noty()->addSuccess('You updated your password successfully!');
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function sendResetLinkEmail(Request $request): void
+    {
+        $emailData = ValidationService::validateSendResetLinkEmail($request);
+        $user = User::query()->where('email', $emailData['email'])->first();
+        if (!$user)
+            throw ValidationException::withMessages([
+                'email' => 'The email you provided does not match our records.',
+            ]);
+
+        $token = Str::random(64);
+        UserVerify::query()->where('user_id', $user->id)->updateOrCreate([
+            'token' => $token,
+            'user_id' => $user->id
+        ]);
+
+        // send reset link mail
+        MailService::sendResetLinkEmail($user, $token);
+
+        noty()->addSuccess('We have emailed your password reset link!');
+    }
+
+    public function verifyResetLink($token): Model
+    {
+        $userVerify = UserVerify::query()->where('token', $token)->first();
+        if (!$userVerify)
+            throw new ModelNotFoundException('Invalid password reset token');
+
+        $user = User::query()->find($userVerify->user_id);
+        if (!$user)
+            throw new ModelNotFoundException('Invalid password reset token');
+
+        return $user;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    public function resetPassword(Request $request): void
+    {
+        $passwordData = ValidationService::validateResetPassword($request);
+        $userVerify = UserVerify::query()->where('token', $passwordData['token'])->first();
+        if (!$userVerify)
+            throw new ModelNotFoundException('Invalid password reset token');
+
+        $user = User::query()->find($userVerify->user_id);
+        if (!$user)
+            throw new ModelNotFoundException('Invalid password reset token');
+
+        $user->password = bcrypt($passwordData['password']);
+        $user->save();
+
+        $userVerify->delete();
+
+        noty()->addSuccess('You reset your password successfully! Please login with your new credentials');
     }
 }
