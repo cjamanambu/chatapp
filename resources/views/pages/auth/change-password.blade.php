@@ -14,6 +14,7 @@
     </div>
     <form action="{{route('auth.post.change-password')}}" method="post" class="py-2">
         @csrf
+        @honeypot
         <div class="mb-3">
             <label for="old-password" class="form-label">Old Password</label>
             <input type="password" class="form-control @error('old_password') error @enderror" id="old-password"

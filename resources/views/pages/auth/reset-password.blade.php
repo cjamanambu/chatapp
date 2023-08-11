@@ -17,6 +17,7 @@
     </p>
     <form action="{{route('auth.post.reset')}}" method="post">
         @csrf
+        @honeypot
         <input type="hidden" name="token" value="{{ $token }}">
         <div class="mb-3">
             <label for="password" class="form-label">New Password</label>

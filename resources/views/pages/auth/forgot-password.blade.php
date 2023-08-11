@@ -18,6 +18,7 @@
     </p>
     <form action="{{route('auth.post.forgot')}}" method="post">
         @csrf
+        @honeypot
         <div class="mb-4">
             <label for="email" class="form-label">Email</label>
             <input type="text" class="form-control @error('email') error @enderror" id="email" name="email"

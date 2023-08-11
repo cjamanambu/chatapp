@@ -14,6 +14,7 @@
     </div>
     <form action="{{route('auth.post.register')}}" method="post" novalidate>
         @csrf
+        @honeypot
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
             <input type="email" class="form-control @error('email') error @enderror" id="email" name="email"
