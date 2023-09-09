@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class Auth extends Controller
 {
@@ -15,22 +17,34 @@ class Auth extends Controller
     {
     }
 
-    function login(): View
+    function getLogin(): Response
     {
-        return view('pages.auth.login');
+        return Inertia::render('Auth/Login');
     }
 
-    function register(): View
+    function getRegister(): Response
     {
-        return view('pages.auth.register');
+        return Inertia::render('Auth/Register');
     }
 
-    function forgotPassword(): View
+    function getLogout(Request $request): RedirectResponse
     {
-        return view('pages.auth.forgot-password');
+        try {
+            $this->authService->signOut($request);
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('auth.get.login');
     }
 
-    function verifyEmail($token): RedirectResponse
+    function getForgotPassword(): Response
+    {
+        return Inertia::render('Auth/ForgotPassword');
+    }
+
+    function getVerifyEmail($token): RedirectResponse
     {
         try {
             $this->authService->verifyEmail($token);
@@ -41,40 +55,17 @@ class Auth extends Controller
             abort(500);
         }
 
-        return redirect()->route('home');
+        return redirect()->route('dashboard');
     }
 
-    function signIn(Request $request): RedirectResponse
+    function getUnverified(): Response
     {
-        try {
-            $this->authService->signIn($request);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
-            abort(500);
-        }
-
-        return redirect()->route('home');
+        return Inertia::render('Auth/Unverified');
     }
 
-    function signUp(Request $request): RedirectResponse
+    function changePassword(): Response
     {
-        try {
-            $this->authService->signUp($request);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
-            abort(500);
-        }
-
-        return redirect()->route('home');
-    }
-
-    function unverified(): View
-    {
-        return view('pages.auth.unverified');
+        return Inertia::render('Auth/ChangePassword');
     }
 
     function resendVerificationEmail(): RedirectResponse
@@ -86,18 +77,6 @@ class Auth extends Controller
             logger($exception->getMessage());
             abort(500);
         }
-    }
-
-    function signOut(Request $request): RedirectResponse
-    {
-        try {
-            $this->authService->signOut($request);
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
-            abort(500);
-        }
-
-        return redirect()->route('home');
     }
 
     function redirectToGoogle()
@@ -121,43 +100,10 @@ class Auth extends Controller
             abort(500);
         }
 
-        return redirect()->route('home');
+        return redirect()->route('dashboard');
     }
 
-    function changePassword(): View
-    {
-        return view('pages.auth.change-password');
-    }
-
-    function updatePassword(Request $request)
-    {
-        try {
-            $this->authService->updatePassword($request);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
-            abort(500);
-        }
-
-        return back();
-    }
-
-    function sendResetLinkEmail(Request $request)
-    {
-        try {
-            $this->authService->sendResetLinkEmail($request);
-        } catch (ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $exception) {
-            logger($exception->getMessage());
-            abort(500);
-        }
-
-        return back();
-    }
-
-    function verifyResetLink($token): View
+    function verifyResetLink($token): Response
     {
         try {
             $user = $this->authService->verifyResetLink($token);
@@ -168,7 +114,52 @@ class Auth extends Controller
             abort(500);
         }
 
-        return view('pages.auth.reset-password', compact('user', 'token'));
+        return Inertia::render('Auth/ResetPassword', [
+            'user' => $user,
+            'token' => $token
+        ]);
+    }
+
+    function postRegister(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->register($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('auth.get.unverified');
+    }
+
+    function postLogin(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->signIn($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('dashboard');
+    }
+
+    function postForgotPassword(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->sendResetLinkEmail($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('auth.get.forgot-password');
     }
 
     function resetPassword(Request $request): RedirectResponse
@@ -183,5 +174,19 @@ class Auth extends Controller
         }
 
         return redirect()->route('auth.get.login');
+    }
+
+    function updatePassword(Request $request): RedirectResponse
+    {
+        try {
+            $this->authService->updatePassword($request);
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $exception) {
+            logger($exception->getMessage());
+            abort(500);
+        }
+
+        return redirect()->route('auth.get.change-password');
     }
 }

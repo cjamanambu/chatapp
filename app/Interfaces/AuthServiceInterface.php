@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 interface AuthServiceInterface
 {
-    public function signUp(Request $request): void;
+    public function register(Request $request): void;
 
     public function signIn(Request $request): void;
 

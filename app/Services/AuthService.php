@@ -26,7 +26,7 @@ class AuthService implements AuthServiceInterface
     /**
      * @throws ValidationException
      */
-    public function signUp(Request $request): void
+    public function register(Request $request): void
     {
         $newUser = ValidationService::validateSignUp($request);
         $user = User::query()->create($newUser);
@@ -39,8 +39,7 @@ class AuthService implements AuthServiceInterface
 
         MailService::sendVerificationMail($user, $token);
 
-        noty()->addSuccess('You signed up successfully. Please check your email to verify your account!');
-
+        session()->flash('success', 'You signed up successfully. Please check your email to verify your account!');
         Auth::login($user);
     }
 
@@ -56,7 +55,7 @@ class AuthService implements AuthServiceInterface
             ]);
         }
 
-        noty()->addSuccess('You signed in successfully. Good to have you back!');
+        session()->flash('success', 'You signed in successfully. Good to have you back!');
     }
 
     public function resendVerificationEmail(): void
@@ -69,7 +68,7 @@ class AuthService implements AuthServiceInterface
         ]);
 
         MailService::sendVerificationMail($user, $token);
-        noty()->addSuccess('The verification email has been successfully resent. Please check your email!');
+        session()->flash('success', 'We successfully resent the verification email. Please check your email!');
     }
 
     public function verifyEmail($token): void
@@ -92,7 +91,8 @@ class AuthService implements AuthServiceInterface
         // send welcome mail
         MailService::sendWelcomeMail($user);
 
-        noty()->addSuccess('Your email has been successfully verified!');
+        session()->flash('success', 'You successfully verified your email.');
+
     }
 
     public function signOut(Request $request): void
@@ -100,8 +100,7 @@ class AuthService implements AuthServiceInterface
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        noty()->addSuccess('You have been successfully logged out!');
+        $request->session()->flash('success', 'You signed out successfully!');
     }
 
     public function redirectToGoogle(): RedirectResponse|\Illuminate\Http\RedirectResponse
@@ -139,9 +138,8 @@ class AuthService implements AuthServiceInterface
 
             // send welcome mail
             MailService::sendWelcomeMail($newUser);
-
         }
-        noty()->addSuccess('You signed in successfully. Good to have you back!');
+        session()->flash('success', 'You signed in successfully. Good to have you back!');
     }
 
     /**
@@ -161,7 +159,7 @@ class AuthService implements AuthServiceInterface
         $userData->password = bcrypt($passwordData['password']);
         $userData->save();
 
-        noty()->addSuccess('You updated your password successfully!');
+        session()->flash('success', 'You updated your password successfully!');
     }
 
     /**
@@ -184,8 +182,6 @@ class AuthService implements AuthServiceInterface
 
         // send reset link mail
         MailService::sendResetLinkEmail($user, $token);
-
-        noty()->addSuccess('We have emailed your password reset link!');
     }
 
     public function verifyResetLink($token): Model
@@ -219,7 +215,6 @@ class AuthService implements AuthServiceInterface
         $user->save();
 
         $userVerify->delete();
-
-        noty()->addSuccess('You reset your password successfully! Please login with your new credentials');
+        session()->flash('success', 'You reset your password successfully! Please login with your new credentials.');
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Interfaces\AuthServiceInterface;
+use App\Interfaces\UserServiceInterface;
 use App\Services\AuthService;
+use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,6 +19,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(
             AuthServiceInterface::class,
             AuthService::class
+        );
+
+        // register user service
+        $this->app->singleton(
+            UserServiceInterface::class,
+            UserService::class
         );
     }
 

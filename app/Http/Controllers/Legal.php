@@ -2,20 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class Legal extends Controller
 {
-    function terms(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+    function getTerms()
     {
-        return view('pages.legal.terms');
+        return Inertia::render('Legal/Terms');
     }
 
-    function privacy(): View|Application|Factory|\Illuminate\Contracts\Foundation\Application
+    function getPrivacy()
     {
-        return view('pages.legal.privacy');
+        return Inertia::render('Legal/Privacy');
     }
 }
