@@ -12,6 +12,12 @@ echo 'Entering maintenance mode...'
 echo 'Pulling latest code version...'
 git pull origin main
 
+# set up node environment
+npm install
+
+# build assets
+npm run build
+
 # Install composer dependencies
 echo 'Installing dependencies...'
 composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
